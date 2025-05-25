@@ -3,3 +3,26 @@ dist/
 .env
 logs/
 /src/generated/prisma
+
+# Ignore macOS system files
+.DS_Store
+# Ignore log files
+*.log
+# Ignore coverage reports
+coverage/
+
+
+# Prisma specific files
+.env
+prisma/.env
+prisma/migrations/
+prisma/dev.db
+prisma/test.db
+prisma/prod.db
+prisma/schema.prisma.backup
+prisma/seed.backup.ts
+
+# Generated Prisma Client
+/src/generated/prisma-client/
+/src/generated/prisma-client-js/
+.prisma/
