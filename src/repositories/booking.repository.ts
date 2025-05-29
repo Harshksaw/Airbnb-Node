@@ -15,7 +15,7 @@ export async function createBooking(bookingData: Prisma.BookingCreateInput) {
     }
 
 
-export async function createIdempotencyKey(bookingId: number, key: string) {
+export async function createIdempotencyKey(bookingId: number, key: number) {
         const idempotencyKey = await prismaClient.idempotencyKey.create({
             data: {
                 key,
@@ -35,7 +35,7 @@ export async function createIdempotencyKey(bookingId: number, key: string) {
 
 
 
-export async function generateIdempotencyKey(key:string){
+export async function getIdempotencyKey(key:string){
 
     const idempotencyKey = await prismaClient.idempotencyKey.findUnique({
         where:{
