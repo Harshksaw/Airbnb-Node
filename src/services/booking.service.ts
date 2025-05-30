@@ -1,4 +1,4 @@
-import { prismaClient } from '@prisma/client';
+
 import { confirmBooking, createBooking, createIdempotencyKey, finalizedIdempotencyKey, getIdempotencyKey } from '../repositories/booking.repository';
 import { generateIdempotencyKey } from '../utils/generateIdempotencyKey';
 import { BadRequestError, NotFoundError } from '../utils/errors/app.error';
@@ -6,7 +6,7 @@ import { CreateBookingDTO } from '../dto/booking.dto';
 
 
 
-export async function createBookinService(
+export async function createBookingService(
 createBookingDto:CreateBookingDTO
 
 ) {
