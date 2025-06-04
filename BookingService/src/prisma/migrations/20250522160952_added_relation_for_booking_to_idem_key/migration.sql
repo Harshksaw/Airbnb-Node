@@ -17,7 +17,7 @@ ALTER TABLE `Booking` DROP COLUMN `idempotencyKeyId`;
 
 -- AlterTable
 ALTER TABLE `IdempotencyKey` ADD COLUMN `bookingId` INTEGER NOT NULL,
-    ADD COLUMN `finlalized` BOOLEAN NOT NULL DEFAULT false;
+    ADD COLUMN `finalized` BOOLEAN NOT NULL DEFAULT false;
 
 -- CreateIndex
 CREATE UNIQUE INDEX `IdempotencyKey_bookingId_key` ON `IdempotencyKey`(`bookingId`);

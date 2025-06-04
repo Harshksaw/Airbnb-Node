@@ -41,7 +41,7 @@ export async function confirmBookingService(idempotencyKey: string) {
 
         const idempotencyKeyData = await getIdempotencyKeyWithLock(tx, idempotencyKey);
 
-        if(!idempotencyKeyData ) {
+        if(!idempotencyKeyData || !idempotencyKeyData.bookingId) {
             throw new NotFoundError('Idempotency key not found');
         }
 
@@ -54,5 +54,7 @@ export async function confirmBookingService(idempotencyKey: string) {
 
         return booking;
 
-    }); 
+    });
+
+    
 }
