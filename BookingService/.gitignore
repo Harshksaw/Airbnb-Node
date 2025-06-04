@@ -41,7 +41,7 @@ out/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
-mysql_data/
+
 # Environment variables
 .env.local
 .env.development
