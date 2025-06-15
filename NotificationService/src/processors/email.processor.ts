@@ -5,6 +5,10 @@ import { getRedisConnObject } from "../config/redis.config";
 import { MAILER_PAYLOAD } from "../producers/email.producer";
 
 
+
+
+export const setupMailerWorker = () =>{
+
 const emailProcessor = new Worker<NotificationDto>(
 MAILER_QUEUE,
 async(job:Job)=>{
@@ -13,14 +17,14 @@ async(job:Job)=>{
         throw new Error(`Invalid job type: ${job.name}`);
     }
     //call the service layer form here.
+    const payload = job.data;
+    console.log(`Processing email job for ${JSON.stringify(payload)}`);
 
-    
+
 
 }, {
     connection: getRedisConnObject(),
-    concurrency: 5, // Adjust concurrency as needed
-    autorun: true, // Automatically start processing jobs
-    lockDuration: 30000, // Lock duration for processing jobs
+
 }
 
 )
@@ -31,5 +35,8 @@ emailProcessor.on('completed', (job) => {
 });
 
 emailProcessor.on('failed', (job, err) => {
-    console.error(`Job ${job.id} failed with error: ${err.message}`);
+    console.error(`Job ${job} failed with error: ${err.message}`);
 });
+
+
+}

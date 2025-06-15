@@ -1,0 +1,10 @@
+FROM redis:alpine
+
+# Expose Redis default port
+EXPOSE 6379
+
+# Set working directory
+WORKDIR /data
+
+# Run Redis with configuration to allow remote connections
+CMD ["redis-server", "--protected-mode", "no"]

@@ -10,6 +10,7 @@ export function connectToRedis() {
         const redisConfig = {
             port: serverConfig.REDIS_PORT || 6379,
             host: serverConfig.REDIS_HOST || 'localhost',
+              maxRetriesPerRequest:null,
         }
 
         return () => {
