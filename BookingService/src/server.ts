@@ -5,7 +5,7 @@ import v2Router from './routers/v2/index.router';
 import { appErrorHandler, genericErrorHandler } from './middlewares/error.middleware';
 import logger from './config/logger.config';
 import { attachCorrelationIdMiddleware } from './middlewares/correlation.middleware';
-import { addEmailToQueue } from './producer/email.producer';
+import { addEmailToQueue } from './producers/email.producer';
 const app = express();
 
 app.use(express.json());
@@ -31,20 +31,15 @@ app.listen(serverConfig.PORT, () => {
     logger.info(`Server is running on http://localhost:${serverConfig.PORT}`);
     logger.info(`Press Ctrl+C to stop the server.`);
 
-    addEmailToQueue({
-        to: " XXXXXXXXXXXXXXXX",
-        subject: "Test Email",
-
-        templatedId: "welcome_email",
-
-        params: {
-            name: "John Doe",
-            orderId: "XXXXX",
-        }
-    }).then(() => { 
-        logger.info("Sample email job added to queue successfully.");
+    for(let i = 0; i < 10; i++) {
+        addEmailToQueue({
+            to: `sample from booking ${i}`,
+            subject: "Sample Email booking",
+            templateId: "sample-template",
+            params: {
+                name: "John Doe",
+                orderId: "12345",
+            }
+        })
     }
-    ).catch((error) => {
-        logger.error("Error adding sample email job to queue:", error);
-    })
 });

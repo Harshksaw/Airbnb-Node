@@ -37,7 +37,7 @@ export async function createBookingService(createBookingDTO: CreateBookingDTO) {
 // Todo: explore the function for potential issues and improvements
 export async function confirmBookingService(idempotencyKey: string) {
 
-    return await prismaClient.$transaction(async (tx:string) => {
+    return await prismaClient.$transaction(async (tx:any) => {
 
         const idempotencyKeyData = await getIdempotencyKeyWithLock(tx, idempotencyKey);
 
@@ -54,7 +54,5 @@ export async function confirmBookingService(idempotencyKey: string) {
 
         return booking;
 
-    });
-
-    
+    }); 
 }
