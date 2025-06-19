@@ -4,7 +4,7 @@ import { NotificationDto } from '../dto/notification.dto';
 import {mailerQueue} from '../queues/mailer.queue';
 
 
-export const MAILER_PAYLOAD = "payload:mail";
+export const MAILER_PAYLOAD = "payload-mail";
 export const addEmailToQueue = async(payload:NotificationDto) => {
     try {
         await mailerQueue.add('sendEmail', payload, {

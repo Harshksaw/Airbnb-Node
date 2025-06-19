@@ -1,7 +1,7 @@
 export interface NotificationDto {
     to: string;
     subject:string;
-    templatedId: string:
+    templateId: string:
     params: Record<string, any>;
 }
 
