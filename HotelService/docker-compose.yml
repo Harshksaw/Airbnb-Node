@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-local
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: yourRootPass
+      MYSQL_DATABASE: hoteldb
+      MYSQL_USER: hoteluser
+      MYSQL_PASSWORD: hotelpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
+    driver: local
