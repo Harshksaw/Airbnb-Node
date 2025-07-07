@@ -15,6 +15,19 @@ type Config struct {
 
 }
 
+
+func NewConfig(addr string) Config {
+	return Config{
+		Addr: addr,
+	}
+}
+//constructor in go
+func NewApplication(cfg Config) *Application {
+	return &Application{
+		Config: cfg,
+	}
+}
+
 func (app *Application) Run()error{
 	server := &http.Server{
 		Addr: app.Config.Addr, //port
