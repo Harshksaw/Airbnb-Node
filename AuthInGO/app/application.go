@@ -1,10 +1,13 @@
 package app
 
-import ("net/http" 
-"time" 
-"fmt"
- "os"
-  "log")
+import (
+	"AuthInGO/config"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"time"
+)
 
 type Application struct {
 	Config Config
@@ -16,9 +19,12 @@ type Config struct {
 }
 
 
-func NewConfig(addr string) Config {
+func NewConfig() Config {
+
+	port := config.GetString("PORT", ":8080")
+
 	return Config{
-		Addr: addr,
+		Addr: port,
 	}
 }
 //constructor in go
