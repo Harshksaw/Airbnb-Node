@@ -2,6 +2,7 @@ package app
 
 import (
 	"AuthInGO/config"
+	db "AuthInGO/db/repositories"
 	"AuthInGO/router"
 	"fmt"
 	"log"
@@ -12,6 +13,7 @@ import (
 
 type Application struct {
 	Config Config
+	Store db.Storage
 }
 
 type Config struct {
@@ -32,6 +34,7 @@ func NewConfig() Config {
 func NewApplication(cfg Config) *Application {
 	return &Application{
 		Config: cfg,
+		Store: *db.NewStorage()
 	}
 }
 
