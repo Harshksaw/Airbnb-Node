@@ -3,7 +3,8 @@ package main
 import (
 	"AuthInGo/app"
 
-	config  "AuthInGo/config" 
+	config  "AuthInGo/config/env" 
+	
 
 )
 

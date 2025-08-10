@@ -8,7 +8,8 @@ import (
 
 type UserRepository interface {
 	// Define methods for user repository
-	CreateUser() error
+	GetById() (*models.User, error)
+	Create() ( error)
 
 }
 
@@ -26,9 +27,34 @@ func NewUserRepository(db *sql.DB) UserRepository {
 func (u *UserRepositoryImpl) Create() error {
 	// Implementation for creating a user in the database
 	fmt.Println("fetching  user in UserRepository")
+	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?, )"
+
+	result, err := u.db.Exec(query, "harsh", "harsh@gmail.com", "123456")
+	if err != nil {
+		fmt.Println("Error creating user:", err)
+		return err
+	}
+	rowsAffected , rowsErr := result.RowsAffected()
+
+	if rowsErr != nil {
+		fmt.Println("Error fetching rows affected:", rowsErr)
+		return rowsErr
+	}
+	if rowsAffected == 0 {
+		fmt.Println("No rows were inserted")
+		return nil
+	}
+	if rowsAffected > 0 {
+		fmt.Println("User created successfully")
+	}
+
+
+
+	
+
 	return nil
 }
-func (u *UserRepositoryImpl) GetById(id int) ( error) {
+func (u *UserRepositoryImpl) GetById(id int) (*models.User, error) {
 	// Implementation for getting a user by ID from the database
 	fmt.Println("Fetching user by ID in UserRepository")
 
@@ -47,15 +73,15 @@ func (u *UserRepositoryImpl) GetById(id int) ( error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			fmt.Println("No user found with the given ID")
-			return nil
+			return nil,err
 		} else{
 			fmt.Println("Error fetching user by ID:", err)
-			return err
+			return nil, err
 		}
 	}
 	fmt.Println(user, "User fetched successfully")
 
 
 	// Example: return a dummy user for demonstration
-	return  nil
+	return  user, nil
 }
