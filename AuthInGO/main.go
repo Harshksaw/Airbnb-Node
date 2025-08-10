@@ -1,9 +1,9 @@
 package main
 
 import (
-	"AuthInGO/app"
+	"AuthInGo/app"
 
-	config  "AuthInGO/config" 
+	config  "AuthInGo/config" 
 
 )
 

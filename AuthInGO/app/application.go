@@ -1,28 +1,27 @@
 package app
 
 import (
-	"AuthInGO/config"
-	db "AuthInGO/db/repositories"
-	"AuthInGO/router"
-	"AuthInGO/services"
+	"AuthInGo/config/db"
+    "AuthInGo/config/env"
+    "AuthInGo/router"
+    "AuthInGo/services"
+
+
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
+// Config holds the configuration for the server.
+type Config struct {
+	Addr string // PORT
+}
+
 type Application struct {
 	Config Config
-	Store db.Storage
 }
 
-type Config struct {
-	Addr string	
-
-}
-
-
+// Constructor for Config
 func NewConfig() Config {
 
 	port := config.GetString("PORT", ":8080")
@@ -31,36 +30,42 @@ func NewConfig() Config {
 		Addr: port,
 	}
 }
-//constructor in go
+
+// Constructor for Application
 func NewApplication(cfg Config) *Application {
 	return &Application{
 		Config: cfg,
-		Store: *db.NewStorage(),
 	}
 }
 
-func (app *Application) Run()error{
-	// Initialize the router
+func (app *Application) Run() error {
 
-	ur := db.NewUserRepository()
-	us := services.NewUserService(ur)
-	uc := controllers.NewUserController(us)
-	userRouter := router.NewUserRouter(uc)
+	db, err := dbConfig.SetupDB()
 
-	server := &http.Server{
-		Addr: app.Config.Addr, //port
-		Handler: router.SetupRouter(userRouter), //setup a chi router and put it here
-		ReadTimeout: 10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout: 10 * time.Second,
-
-		ErrorLog: log.New(os.Stdout, "", 0),
-		
-
-		
+	if err != nil {
+		fmt.Println("Error setting up database:", err)
+		return err
 	}
 
-	fmt.Println("Server is running on", app.Config.Addr)
-	return server.ListenAndServe()
+	ur := repo.NewUserRepository(db)
+	// rr := repo.NewRoleRepository(db)
+	// rpr := repo.NewRolePermissionRepository(db)
+	// urr := repo.NewUserRoleRepository(db)
+	us := services.NewUserService(ur)
+	// rs := services.NewRoleService(rr, rpr, urr)
+	// uc := controllers.NewUserController(us)
+	// rc := controllers.NewRoleController(rs)
+	uRouter := router.NewUserRouter(uc)
+	// rRouter := router.NewRoleRouter(rc)
 
+	server := &http.Server{
+		Addr:         app.Config.Addr,
+		Handler:      router.SetupRouter(uRouter),
+		ReadTimeout:  10 * time.Second, // Set read timeout to 10 seconds
+		WriteTimeout: 10 * time.Second, // Set write timeout to 10 seconds
+	}
+
+	fmt.Println("Starting server on", app.Config.Addr)
+
+	return server.ListenAndServe()
 }
