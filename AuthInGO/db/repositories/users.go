@@ -1,15 +1,15 @@
 package db
 
 import (
+	"AuthInGo/models"
 	"database/sql"
 	"fmt"
-	models "AuthInGo/models"
 )
 
 type UserRepository interface {
-	// Define methods for user repository
-	GetById() (*models.User, error)
-	Create() ( error)
+
+	GetById(id string) (*models.User, error)
+	Create(username string, email string, password string) ( error)
 
 }
 
@@ -18,13 +18,14 @@ type UserRepositoryImpl struct {
 
 }
 
-func NewUserRepository(db *sql.DB) UserRepository {
+func NewUserRepository(_db *sql.DB) UserRepository {
 	return &UserRepositoryImpl{
-		db: db,
+		db: _db,
 	}
 }
 
-func (u *UserRepositoryImpl) Create() error {
+
+func (u *UserRepositoryImpl) Create(username string, email string, password string) ( error) {
 	// Implementation for creating a user in the database
 	fmt.Println("fetching  user in UserRepository")
 	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?, )"
@@ -54,7 +55,7 @@ func (u *UserRepositoryImpl) Create() error {
 
 	return nil
 }
-func (u *UserRepositoryImpl) GetById(id int) (*models.User, error) {
+func (u *UserRepositoryImpl) GetById(id string) (*models.User, error) {
 	// Implementation for getting a user by ID from the database
 	fmt.Println("Fetching user by ID in UserRepository")
 

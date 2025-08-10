@@ -17,18 +17,25 @@ func NewUserCOntroller(_userService services.UserService) *UserController {
 	}
 }
 func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-    err := uc.UserService.CreateUser()
-    if err != nil {
-        http.Error(w, "Failed to create user", http.StatusInternalServerError)
-        return
-    }
-    w.Write([]byte("User created successfully"))
+	// payload := r.Context().Value("payload").(dto.CreateUserRequestDTO)
+
+	// fmt.Println("Payload received:", payload)
+
+	// user, err := uc.UserService.CreateUser(&payload)
+
+	// if err != nil {
+	// 	utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to create user", err)
+	// 	return
+	// }
+
+	// utils.WriteJsonSuccessResponse(w, http.StatusCreated, "User created successfully", user)
+	fmt.Println("User created successfully:", user)
 }
 
 func (uc *UserController) GetUserById(w http.ResponseWriter , r *http.Request) error {
 	// Call the user service to create a user
 	fmt.Println("Getting user in UserController")
-	uc.UserService.CreateUser();
+	// uc.UserService.CreateUser();
 	w.Write([]byte("User created successfully"))
 
 
