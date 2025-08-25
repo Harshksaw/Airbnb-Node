@@ -10,6 +10,9 @@ type UserRepository interface {
 
 	GetById(id string) (*models.User, error)
 	Create(username string, email string, password string) ( error)
+	GetByEmail(email string) (*models.User, error)
+	GetAll() ([]*models.User, error)
+	DeleteByID(id int64 )error
 
 }
 
@@ -85,4 +88,28 @@ func (u *UserRepositoryImpl) GetById(id string) (*models.User, error) {
 
 	// Example: return a dummy user for demonstration
 	return  user, nil
+}
+
+
+
+func (u *UserRepositoryImpl) LoginUser(email string , password  string) (error){
+	//fetch user by email and password from database
+
+	fmt.Println("Logging in user in UserRepository")
+	query := "SELECT id, username, email , password , created_at , updated_at FROM users WHERE email = ? AND password = ?"
+
+	result, err := u.db.QueryRow(query, email, password)
+
+	if err != nil {
+		fmt.Println("Error logging in user:", err)
+		return err
+	}
+	if result == nil {
+		fmt.Println("No user found with the given email and password")
+		return nil
+	}
+	fmt.Println("User logged in successfully")
+	return nil
+
+
 }

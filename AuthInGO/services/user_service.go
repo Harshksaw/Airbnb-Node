@@ -12,6 +12,7 @@ import (
 
 type UserService interface {
 	GetUserByID(id string) (*models.User, error)
+	CreateUser() error
 }
 type UserServiceImpl struct {
  	userRepository db.UserRepository
@@ -26,6 +27,8 @@ func (u *UserServiceImpl) CreateUser() error {
 	// Implementation for creating a user
 	fmt.Println("Creating user in UserService")
 	// u.userRepository.GetUserByID()
+
+	u.userRepository.Create("harsh", "user@gmamil.com", "123456")
 	
 	return nil
 }
