@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"AuthInGo/services"
+	"AuthInGo/utils"
 	"fmt"
 	"net/http"
 )
@@ -41,4 +42,21 @@ func (uc *UserController) GetUserById(w http.ResponseWriter , r *http.Request) e
 
 	return nil
 
+}
+
+func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
+
+	// payload := r.Context().Value("payload").(dto.LoginUserRequestDTO)
+
+	fmt.Println("Payload received:")
+
+	user, err := uc.UserService.LoginUser("user@gmamil.com", "123456")
+
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to login user", err)
+		return
+	}
+
+	// utils.WriteJsonSuccessResponse(w, http.StatusCreated, "User created successfully", user)
+	fmt.Println("User logged in successfully:", user)
 }
