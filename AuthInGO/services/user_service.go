@@ -5,6 +5,7 @@ import (
 	"AuthInGo/models"
 	"AuthInGo/utils"
 	"fmt"
+
 )
 
 type UserService interface {
@@ -27,7 +28,7 @@ func (u *UserServiceImpl) CreateUser() error {
 	// u.userRepository.GetUserByID()
 
 	password := "123456"
-	hashedPassword := utils.HashPassword(password)
+	hashedPassword , err := utils.HashPassword(password)
 
 	if err !=  nil {
 		return err
@@ -59,14 +60,23 @@ func ( u *UserServiceImpl) LoginUser(email, password string) (*models.User, erro
 		return nil, err
 	}
 
+	//return JWT
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+
 	if !utils.CheckPasswordHash(password, user.Password) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
-	//return JWT 
 
-	
 
-	utils.CheckPasswordHash(password,userRepository.GetByEmail(email).Password)
+
+	tokenString , err := utils.createToken(user.Email)
+
+
+
+	return user, err
 
 
 }
