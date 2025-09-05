@@ -2,16 +2,19 @@ package services
 
 import (
 	db "AuthInGo/db/repositories"
+	"AuthInGo/dto"
 	"AuthInGo/models"
 	"AuthInGo/utils"
 	"fmt"
 
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type UserService interface {
 	GetUserByID(id string) (*models.User, error)
 	CreateUser() error
-	LoginUser(email, password string) (*models.User, error)
+	LoginUser(payload *dto.LoginUserRequestDTO) (string, error)
 }
 type UserServiceImpl struct {
 	userRepository db.UserRepository
@@ -53,9 +56,16 @@ func (u *UserServiceImpl) GetUserByID(id string) (*models.User, error) {
 }
 
 
-func ( u *UserServiceImpl) LoginUser(email, password string) (*models.User, error) {
+func ( u *UserServiceImpl) LoginUser(payload dto.LoginUserRequestDTO) (string, error) {
 
+
+	email := payload.Email
+	password := payload.Password
 	user, err := u.userRepository.GetByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -65,18 +75,30 @@ func ( u *UserServiceImpl) LoginUser(email, password string) (*models.User, erro
 		return nil, fmt.Errorf("user not found")
 	}
 
-
-	if !utils.CheckPasswordHash(password, user.Password) {
+	isPasswordValid := utils.CheckPasswordHash(password, user.Password)
+	if !isPasswordValid {
 		return nil, fmt.Errorf("invalid credentials")
+	}
+
+	jwtPayload := jwt.MapClaims{
+		"email": user.Email,
+
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtPayload)
+	
+	tokenString, err := token.SignedString([]byte("your_secret_key"))
+
+	if err != nil {
+		return "er" , nil
 	}
 
 
 
-	tokenString , err := utils.createToken(user.Email)
 
 
 
-	return user, err
+	return tokenString , nil
 
 
 }

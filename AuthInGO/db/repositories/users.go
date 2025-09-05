@@ -31,7 +31,7 @@ func NewUserRepository(_db *sql.DB) UserRepository {
 func (u *UserRepositoryImpl) Create(username string, email string, password string) ( error) {
 	// Implementation for creating a user in the database
 	fmt.Println("fetching  user in UserRepository")
-	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?, )"
+	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
 
 	result, err := u.db.Exec(query, "harsh", "harsh@gmail.com", "123456")
 	if err != nil {
@@ -118,18 +118,79 @@ func (u *UserRepositoryImpl) LoginUser(email string , password  string) (error){
 	fmt.Println("Logging in user in UserRepository")
 	query := "SELECT id, username, email , password , created_at , updated_at FROM users WHERE email = ? AND password = ?"
 
-	result, err := u.db.QueryRow(query, email, password)
+	row := u.db.QueryRow(query, email, password)
+
+	user := &models.User{}
+	err := row.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			fmt.Println("No user found with the given email and password")
+			return err
+		}
 		fmt.Println("Error logging in user:", err)
 		return err
 	}
-	if result == nil {
-		fmt.Println("No user found with the given email and password")
-		return nil
-	}
+	
 	fmt.Println("User logged in successfully")
 	return nil
+}
 
+func (u *UserRepositoryImpl) GetAll() ([]*models.User, error) {
+	fmt.Println("Fetching all users in UserRepository")
+	
+	query := "SELECT id, username, email, password, created_at, updated_at FROM users"
+	
+	rows, err := u.db.Query(query)
+	if err != nil {
+		fmt.Println("Error fetching all users:", err)
+		return nil, err
+	}
+	defer rows.Close()
+	
+	var users []*models.User
+	
+	for rows.Next() {
+		user := &models.User{}
+		err := rows.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			fmt.Println("Error scanning user:", err)
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	
+	if err = rows.Err(); err != nil {
+		fmt.Println("Error iterating rows:", err)
+		return nil, err
+	}
+	
+	fmt.Println("All users fetched successfully")
+	return users, nil
+}
 
+func (u *UserRepositoryImpl) DeleteByID(id int64) error {
+	fmt.Println("Deleting user by ID in UserRepository")
+	
+	query := "DELETE FROM users WHERE id = ?"
+	
+	result, err := u.db.Exec(query, id)
+	if err != nil {
+		fmt.Println("Error deleting user:", err)
+		return err
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		fmt.Println("Error fetching rows affected:", err)
+		return err
+	}
+	
+	if rowsAffected == 0 {
+		fmt.Println("No user found with the given ID")
+		return fmt.Errorf("no user found with ID %d", id)
+	}
+	
+	fmt.Println("User deleted successfully")
+	return nil
 }
