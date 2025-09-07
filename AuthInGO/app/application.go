@@ -2,12 +2,11 @@ package app
 
 import (
 	dbConfig "AuthInGo/config/db"
-    envConfig "AuthInGo/config/env"
-    "AuthInGo/controllers"
-    db "AuthInGo/db/repositories"
-    "AuthInGo/router"
-    "AuthInGo/services"
-
+	envConfig "AuthInGo/config/env"
+	"AuthInGo/controllers"
+	db "AuthInGo/db/repositories"
+	"AuthInGo/router"
+	"AuthInGo/services"
 
 	"fmt"
 	"net/http"
