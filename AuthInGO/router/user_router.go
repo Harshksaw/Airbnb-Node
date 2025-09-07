@@ -9,7 +9,7 @@ import (
 
 
 type UserRouter struct{
-	userController controllers.UserController
+	userController *controllers.UserController
 }
 
 func NewUserRouter(_userController *controllers.UserController) Router {

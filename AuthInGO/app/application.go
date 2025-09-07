@@ -1,11 +1,11 @@
 package app
 
 import (
-	"AuthInGo/config/db"
-    "AuthInGo/config/env"
-    "AuthInGo/router"
-    "AuthInGo/services"
-
+	dbAlias "AuthInGo/db/repositories"
+	dbConfig "AuthInGo/config/db"
+	envAlias "AuthInGo/config/env"
+	"AuthInGo/router"
+	"AuthInGo/services"
 
 	"fmt"
 	"net/http"
@@ -24,7 +24,7 @@ type Application struct {
 // Constructor for Config
 func NewConfig() Config {
 
-	port := config.GetString("PORT", ":8080")
+	port := envAlias.GetString("PORT", ":8080")
 
 	return Config{
 		Addr: port,
@@ -40,27 +40,19 @@ func NewApplication(cfg Config) *Application {
 
 func (app *Application) Run() error {
 
-	db, err := dbConfig.SetupDB()
-
+	dbInstance, err := dbConfig.SetupDB()
 	if err != nil {
-		fmt.Println("Error setting up database:", err)
-		return err
+		return fmt.Errorf("failed to setup database: %w", err)
 	}
 
-	ur := repo.NewUserRepository(db)
-	// rr := repo.NewRoleRepository(db)
-	// rpr := repo.NewRolePermissionRepository(db)
-	// urr := repo.NewUserRoleRepository(db)
-	us := services.NewUserService(ur)
-	// rs := services.NewRoleService(rr, rpr, urr)
-	// uc := controllers.NewUserController(us)
-	// rc := controllers.NewRoleController(rs)
-	uRouter := router.NewUserRouter(uc)
-	// rRouter := router.NewRoleRouter(rc)
+	repo := dbAlias.NewUserRepository(dbInstance)
+	services.NewUserService(repo)
+
+	handler := router.SetupRouter()
 
 	server := &http.Server{
 		Addr:         app.Config.Addr,
-		Handler:      router.SetupRouter(uRouter),
+		Handler:      handler,
 		ReadTimeout:  10 * time.Second, // Set read timeout to 10 seconds
 		WriteTimeout: 10 * time.Second, // Set write timeout to 10 seconds
 	}

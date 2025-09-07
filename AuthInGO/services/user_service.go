@@ -39,7 +39,9 @@ func (u *UserServiceImpl) CreateUser(payload *dto.CreateUserRequestDTO) (*dto.Cr
 	u.userRepository.Create("harsh", "user@gmamil.com", hashedPassword)
 
 	return &dto.CreateUserResponseDTO{
-		Message: "User created successfully",
+		Id:       1,                 // Replace with actual ID
+		Username: "harsh",           // Replace with actual username
+		Email:    "user@gmamil.com", // Replace with actual email
 	}, nil
 }
 
