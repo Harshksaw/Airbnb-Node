@@ -17,19 +17,24 @@ func NewUserController(_userService services.UserService) *UserController {
 		UserService: _userService,
 	}
 }
-func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	// payload := r.Context().Value("payload").(dto.CreateUserRequestDTO)
+func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request)  {
+	payload := r.Context().Value("payload").(*dto.CreateUserRequestDTO)
 
-	fmt.Println("Payload received:")
 
-	user, err := uc.UserService.CreateUser()
+	if jsonErr := utils.ReadJsonBody(r, &payload); jsonErr != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid JSON body", jsonErr)
+		return
+	}
+
+	user, err := uc.UserService.CreateUser(&payload)
+
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to create user: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	// utils.WriteJsonSuccessResponse(w, http.StatusCreated, "User created successfully", user)
+	utils.WriteJsonSuccessResponse(w, http.StatusCreated, "User created successfully", user)
 	fmt.Println("User created successfully:", user)
 }
 
@@ -45,26 +50,28 @@ func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) er
 
 func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
 
-	// payload := r.Context().Value("payload").(dto.LoginUserRequestDTO)
+	payload := r.Context().Value("payload").(dto.LoginUserRequestDTO)
 
-	var payload dto.LoginUserRequestDTO
+	// var payload dto.LoginUserRequestDTO
+
+
+	jwtToken, err := uc.UserService.LoginUser(&payload)
 
 	if jsonErr := utils.ReadJsonBody(r, &payload); jsonErr != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, jsonErr, "Invalid JSON body")
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest,  "Invalid JSON body",jsonErr)
 		return
 
 	}
 
 	if validationErr := utils.Validator.Struct(payload); validationErr != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, validationErr, "Invalid request payload")
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, validationErr, "Invalid request payload",validationErr)
 		return
 	}
 
-	jwtToken, err := uc.UserService.LoginUser(&payload)
 
 
 	if err != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, err, "Failed to login user")	
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, err, "Failed to login user",err)	
 		return
 	}
 

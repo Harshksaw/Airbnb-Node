@@ -34,7 +34,7 @@ func WriteJsonSuccessResponse(w http.ResponseWriter, status int, message string,
 	}
 	return WriteJsonResponse(w, status, response)
 }
-func WriteJsonErrorResponse(w http.ResponseWriter, status int,err error, errorMessage string) error {
+func WriteJsonErrorResponse(w http.ResponseWriter, status int ,errorMessage string,err error ) error {
 	response := map[string]string{
 		"status": "error",
 		"message": errorMessage,

@@ -5,6 +5,7 @@ import (
 
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 type Router interface{
 	Register(r *chi.Router)
@@ -14,6 +15,9 @@ type Router interface{
 func SetupRouter() *chi.Mux {
 
 	chirouter := chi.NewRouter()
+
+	chirouter.Use(middleware.Logger)
+
 	chirouter.Get("/ping", controllers.PingHandler)
 
 

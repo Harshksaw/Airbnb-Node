@@ -56,49 +56,32 @@ func (u *UserServiceImpl) GetUserByID(id string) (*models.User, error) {
 }
 
 
-func ( u *UserServiceImpl) LoginUser(payload dto.LoginUserRequestDTO) (string, error) {
-
-
+func (u *UserServiceImpl) LoginUser(payload *dto.LoginUserRequestDTO) (string, error) {
 	email := payload.Email
 	password := payload.Password
+
 	user, err := u.userRepository.GetByEmail(email)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	//return JWT
 	if user == nil {
-		return nil, fmt.Errorf("user not found")
+		return "", fmt.Errorf("user not found")
 	}
 
 	isPasswordValid := utils.CheckPasswordHash(password, user.Password)
 	if !isPasswordValid {
-		return nil, fmt.Errorf("invalid credentials")
+		return "", fmt.Errorf("invalid credentials")
 	}
 
 	jwtPayload := jwt.MapClaims{
 		"email": user.Email,
-
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtPayload)
-	
 	tokenString, err := token.SignedString([]byte("your_secret_key"))
-
 	if err != nil {
-		return "er" , nil
+		return "", err
 	}
 
-
-
-
-
-
-	return tokenString , nil
-
-
+	return tokenString, nil
 }
