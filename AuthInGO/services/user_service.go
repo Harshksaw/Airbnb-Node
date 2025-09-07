@@ -6,14 +6,14 @@ import (
 	"AuthInGo/models"
 	"AuthInGo/utils"
 	"fmt"
-
+	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type UserService interface {
 	GetUserByID(id string) (*models.User, error)
-	CreateUser() error
+	CreateUser(payload *dto.CreateUserRequestDTO) (*dto.CreateUserResponseDTO, error)
 	LoginUser(payload *dto.LoginUserRequestDTO) (string, error)
 }
 type UserServiceImpl struct {
@@ -25,21 +25,22 @@ func NewUserService(_userRepository db.UserRepository) UserService {
 		userRepository: _userRepository,
 	}
 }
-func (u *UserServiceImpl) CreateUser() error {
+func (u *UserServiceImpl) CreateUser(payload *dto.CreateUserRequestDTO) (*dto.CreateUserResponseDTO, error) {
 	// Implementation for creating a user
 	fmt.Println("Creating user in UserService")
-	// u.userRepository.GetUserByID()
 
 	password := "123456"
-	hashedPassword , err := utils.HashPassword(password)
+	hashedPassword, err := utils.HashPassword(password)
 
-	if err !=  nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
 	u.userRepository.Create("harsh", "user@gmamil.com", hashedPassword)
 
-	return nil
+	return &dto.CreateUserResponseDTO{
+		Message: "User created successfully",
+	}, nil
 }
 
 func (u *UserServiceImpl) GetUserByID(id string) (*models.User, error) {
@@ -54,7 +55,6 @@ func (u *UserServiceImpl) GetUserByID(id string) (*models.User, error) {
 
 	return user, nil
 }
-
 
 func (u *UserServiceImpl) LoginUser(payload *dto.LoginUserRequestDTO) (string, error) {
 	email := payload.Email
@@ -78,7 +78,11 @@ func (u *UserServiceImpl) LoginUser(payload *dto.LoginUserRequestDTO) (string, e
 		"email": user.Email,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtPayload)
-	tokenString, err := token.SignedString([]byte("your_secret_key"))
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "TOKEN"
+	}
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		return "", err
 	}
