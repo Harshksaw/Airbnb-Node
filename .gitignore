@@ -67,3 +67,6 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# Go binaries
+AuthInGO/AuthInGo

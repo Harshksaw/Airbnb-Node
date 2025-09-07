@@ -29,17 +29,21 @@ func (u *UserServiceImpl) CreateUser(payload *dto.CreateUserRequestDTO) (*dto.Cr
 	// Implementation for creating a user
 	fmt.Println("Creating user in UserService")
 
-	password := "123456"
-	hashedPassword, err := utils.HashPassword(password)
+	hashedPassword, err := utils.HashPassword(payload.Password)
 
 	if err != nil {
 		return nil, err
 	}
 
-	u.userRepository.Create("harsh", "user@gmamil.com", hashedPassword)
+	err = u.userRepository.Create(payload.Username, payload.Email, hashedPassword)
+	if err != nil {
+		return nil, err
+	}
 
 	return &dto.CreateUserResponseDTO{
-		Message: "User created successfully",
+		Id:       1, // This should ideally be returned from the database
+		Username: payload.Username,
+		Email:    payload.Email,
 	}, nil
 }
 

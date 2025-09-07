@@ -2,9 +2,10 @@ package utils
 
 import (
 	"encoding/json"
-	"net/http"
 	"github.com/go-playground/validator/v10"
+	"net/http"
 )
+
 var Validator *validator.Validate
 
 func init() {
@@ -14,16 +15,11 @@ func NewValidator() *validator.Validate {
 	return validator.New(validator.WithRequiredStructEnabled())
 }
 
-
-func WriteJsonResponse(w http.ResponseWriter , status int , data any) error {
+func WriteJsonResponse(w http.ResponseWriter, status int, data any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	w.WriteHeader(status)
-
-
 	return json.NewEncoder(w).Encode(data)
-
 }
 
 func WriteJsonSuccessResponse(w http.ResponseWriter, status int, message string, data any) error {
@@ -34,11 +30,13 @@ func WriteJsonSuccessResponse(w http.ResponseWriter, status int, message string,
 	}
 	return WriteJsonResponse(w, status, response)
 }
-func WriteJsonErrorResponse(w http.ResponseWriter, status int ,errorMessage string,err error ) error {
+func WriteJsonErrorResponse(w http.ResponseWriter, status int, errorMessage string, err error) error {
 	response := map[string]string{
-		"status": "error",
+		"status":  "error",
 		"message": errorMessage,
-		"error": err.Error(),
+	}
+	if err != nil {
+		response["error"] = err.Error()
 	}
 	return WriteJsonResponse(w, status, response)
 }
@@ -49,6 +47,5 @@ func ReadJsonBody(r *http.Request, result any) error {
 
 	decoder.DisallowUnknownFields() //Prevent unknown fields from being sent in the request
 	return decoder.Decode(result)
-
 
 }
