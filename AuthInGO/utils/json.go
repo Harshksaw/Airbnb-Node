@@ -19,11 +19,7 @@ func WriteJsonResponse(w http.ResponseWriter , status int , data any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	w.WriteHeader(status)
-
-
 	return json.NewEncoder(w).Encode(data)
-
 }
 
 func WriteJsonSuccessResponse(w http.ResponseWriter, status int, message string, data any) error {
@@ -38,7 +34,9 @@ func WriteJsonErrorResponse(w http.ResponseWriter, status int ,errorMessage stri
 	response := map[string]string{
 		"status": "error",
 		"message": errorMessage,
-		"error": err.Error(),
+	}
+	if err != nil {
+		response["error"] = err.Error()
 	}
 	return WriteJsonResponse(w, status, response)
 }

@@ -30,10 +30,10 @@ func NewUserRepository(_db *sql.DB) UserRepository {
 
 func (u *UserRepositoryImpl) Create(username string, email string, password string) ( error) {
 	// Implementation for creating a user in the database
-	fmt.Println("fetching  user in UserRepository")
+	fmt.Println("Creating user in UserRepository")
 	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
 
-	result, err := u.db.Exec(query, "harsh", "harsh@gmail.com", "123456")
+	result, err := u.db.Exec(query, username, email, password)
 	if err != nil {
 		fmt.Println("Error creating user:", err)
 		return err
@@ -51,10 +51,6 @@ func (u *UserRepositoryImpl) Create(username string, email string, password stri
 	if rowsAffected > 0 {
 		fmt.Println("User created successfully")
 	}
-
-
-
-	
 
 	return nil
 }
