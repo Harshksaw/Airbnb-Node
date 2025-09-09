@@ -17,13 +17,38 @@ func NewUserController(_userService services.UserService) *UserController {
 		UserService: _userService,
 	}
 }
-func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var payload dto.CreateUserRequestDTO
 
-	if jsonErr := utils.ReadJsonBody(r, &payload); jsonErr != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid JSON body", jsonErr)
+func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Fetching user by ID in UserController")
+	// extract userid from url parameters
+	userId := r.URL.Query().Get("id")
+	if userId == "" {
+		userId = r.Context().Value("userID").(string) // Fallback to context if not in URL
+	}
+
+	fmt.Println("User ID from context or query:", userId)
+
+	if userId == "" {
+		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "User ID is required", fmt.Errorf("missing user ID"))
 		return
 	}
+	user, err := uc.UserService.GetUserById(userId)
+	if err != nil {
+		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to fetch user", err)
+		return
+	}
+	if user == nil {
+		utils.WriteJsonErrorResponse(w, http.StatusNotFound, "User not found", fmt.Errorf("user with ID %d not found", userId))
+		return
+	}
+	utils.WriteJsonSuccessResponse(w, http.StatusOK, "User fetched successfully", user)
+	fmt.Println("User fetched successfully:", user)
+}
+
+func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
+	payload := r.Context().Value("payload").(dto.CreateUserRequestDTO)
+
+	fmt.Println("Payload received:", payload)
 
 	user, err := uc.UserService.CreateUser(&payload)
 
@@ -36,49 +61,21 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("User created successfully:", user)
 }
 
-func (uc *UserController) GetUserById(w http.ResponseWriter, r *http.Request) {
-	userId := r.URL.Query().Get("id")
-	if userId == "" {
-		if id, ok := r.Context().Value("userId").(string); ok {
-			userId = id
-		}
-	}
-
-	if userId == "" {
-		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "User ID is missing", nil)
-		return
-	}
-
-	user, err := uc.UserService.GetUserByID(userId)
-	if err != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to get user", err)
-		return
-	}
-	if user == nil {
-		utils.WriteJsonErrorResponse(w, http.StatusNotFound, "User not found", nil)
-		return
-	}
-	utils.WriteJsonSuccessResponse(w, http.StatusOK, "User fetched successfully", user)
-}
-
 func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
-	var payload dto.LoginUserRequestDTO
 
-	if jsonErr := utils.ReadJsonBody(r, &payload); jsonErr != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid JSON body", jsonErr)
-		return
-	}
+	fmt.Println("Logging in user in UserController")
 
-	if validationErr := utils.Validator.Struct(payload); validationErr != nil {
-		utils.WriteJsonErrorResponse(w, http.StatusBadRequest, "Invalid request payload", validationErr)
-		return
-	}
+	payload := r.Context().Value("payload").(dto.LoginUserRequestDTO)
+
+	fmt.Println("Payload received:", payload)
 
 	jwtToken, err := uc.UserService.LoginUser(&payload)
+
 	if err != nil {
 		utils.WriteJsonErrorResponse(w, http.StatusInternalServerError, "Failed to login user", err)
 		return
 	}
 
 	utils.WriteJsonSuccessResponse(w, http.StatusOK, "User logged in successfully", jwtToken)
+
 }

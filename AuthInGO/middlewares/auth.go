@@ -1,23 +1,14 @@
 package middlewares
 
 import (
+	env "AuthInGo/config/env"
 	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 
-	env "AuthInGo/config/env"
-
 	"github.com/golang-jwt/jwt/v5"
-)
-
-// Define custom types for context keys
-type contextKey string
-
-const (
-	userIDKey contextKey = "userId"
-	emailKey  contextKey = "email"
 )
 
 func JWTAuthMiddleware(next http.Handler) http.Handler {
@@ -25,48 +16,47 @@ func JWTAuthMiddleware(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 
 		if authHeader == "" {
-			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
 			return
 		}
 
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
+			http.Error(w, "Authorization header must start with Bearer", http.StatusUnauthorized)
 			return
 		}
 
 		token := strings.TrimPrefix(authHeader, "Bearer ")
-
 		if token == "" {
-			http.Error(w, "Missing token", http.StatusUnauthorized)
+			http.Error(w, "Token is required", http.StatusUnauthorized)
 			return
 		}
 
 		claims := jwt.MapClaims{}
 
-		_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-
+		_, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(env.GetString("JWT_SECRET", "TOKEN")), nil
 		})
 
 		if err != nil {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			http.Error(w, "Invalid token: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
 
-		userId, ok := claims["id"].(float64)
+		userId, okId := claims["id"].(float64)
+
 		email, okEmail := claims["email"].(string)
 
-		if !ok || !okEmail {
+		if !okId || !okEmail {
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 			return
 		}
 
-		fmt.Println("Authenticated user ID:", int(userId), "Email:", email)
+		fmt.Println("Authenticated user ID:", int64(userId), "Email:", email)
 
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, userIDKey, strconv.FormatFloat(userId, 'f', -1, 64))
-		ctx = context.WithValue(ctx, emailKey, email)
-		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), "userID", strconv.FormatFloat(userId, 'f', 0, 64))
+		ctx = context.WithValue(ctx, "email", email)
+		next.ServeHTTP(w, r.WithContext(ctx))
+
 	})
+
 }
