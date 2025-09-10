@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: AuthInGo
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    buildCommand: ""
+    startCommand: "./main"
+    envVars:
+      - key: PORT
+        value: 8080
