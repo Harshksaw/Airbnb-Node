@@ -4,8 +4,6 @@ services:
     env: docker
     plan: free
     dockerfilePath: Dockerfile
+    rootDir: AuthInGo
     buildCommand: ""
     startCommand: "./main"
-    envVars:
-      - key: PORT
-        value: 8080
