@@ -1,9 +1,9 @@
 package app
 
 import (
-	dbAlias "AuthInGo/db/repositories"
 	dbConfig "AuthInGo/config/db"
 	envAlias "AuthInGo/config/env"
+	dbAlias "AuthInGo/db/repositories"
 	"AuthInGo/router"
 	"AuthInGo/services"
 
