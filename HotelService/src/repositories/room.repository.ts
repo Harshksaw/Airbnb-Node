@@ -18,4 +18,8 @@ export class RoomRepository extends BaseRepository<Room> {
         });
     }
 
+
+    async bulkCreate(rooms: Room[]) {
+        return await this.model.bulkCreate(rooms);
+    }
 }

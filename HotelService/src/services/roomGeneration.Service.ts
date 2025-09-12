@@ -12,7 +12,10 @@ export async function generateRooms(jobData : RoomGenerationJob) {
 
     // Implementation for room generation\
 
-    const { roomCategoryId,  priceOverride, batchSize } = jobData;
+    let totalRoomCreated = 0;
+    let totalDatesProcessed = 0;
+
+    const { roomCategoryId,  priceOverride } = jobData;
 
     //check if room category exists
 
@@ -34,11 +37,35 @@ export async function generateRooms(jobData : RoomGenerationJob) {
 
     const totalDays =  Math.ceil(endDate.getTime() - startDate.getTime()) /(1000*60*60*24)
 
+    const batchSize = jobData.batchSize || 30;
+
+    const currentDate = new Date(startDate);
+
+    while (currentDate < endDate) {
+        const batchEndDate = new Date(currentDate);
+        batchEndDate.setDate(batchEndDate.getDate() + batchSize  );
+
+        if(batchEndDate > endDate) {
+            batchEndDate.setTime(endDate.getTime());
+
+
+        }
+
+        const batchResult = await processDateBatch(roomCategory,currentDate, batchEndDate, jobData.priceOverride)
+
+        totalRoomCreated += batchResult.roomsCreated;
+        totalDatesProcessed += batchResult.datesProcessed;
+
+        currentDate.setDate(batchEndDate.getTime());
+
+    }
+
+
 }
 
 
 
-export async function processDateBatch(  roomCategory : RoomCategory ,priceOverride: number | undefined, startDate: Date, endDate : Date ,batchSize: number) {
+export async function processDateBatch(  roomCategory : RoomCategory, startDate : Date ,  endDate : Date ,priceOverride: number | undefined  ) {
     
     
     let roomsCreated = 0;
@@ -58,11 +85,26 @@ export async function processDateBatch(  roomCategory : RoomCategory ,priceOverr
                 roomCategoryId: roomCategory.id,
                 dateOfAvailability: new Date(currentDate),
                 price: priceOverride || roomCategory.price,
+                createdAt:new Date(),
+                updatedAt:new Date(),
+                deletedAt: null
 
             })
         }
+        currentDate.setDate(currentDate.getDate() + 1);
+        datesProcessed++;
     }
-    currentDate.setDate(currentDate.getDate() + 1);
-    datesProcessed++;
+
+    if(roomsToCreate.length > 0) {
+        await roomRepostitory.bulkCreate(roomsToCreate);
+        roomsCreated += roomsToCreate.length;
+        
+    }
+
+    return {roomsCreated, datesProcessed
+
+        
+    };
+    
 
 }
