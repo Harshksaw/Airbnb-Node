@@ -4,38 +4,43 @@ import { RoomGenerationJob } from '../dto/roomGeneration.dto';
 import { RoomCategoryRepository } from '../repositories/roomCategory.repository';
 import RoomCategory from '../db/models/roomCategory';
 import { RoomRepository } from '../repositories/room.repository';
+import logger from '../config/logger.config';
 
 const roomRepostitory = new RoomRepository();
 const roomCategoryRepository = new RoomCategoryRepository();
 
-export async function generateRooms(jobData : RoomGenerationJob) {
+export async function generateRooms(jobData: RoomGenerationJob) {
 
     // Implementation for room generation\
 
     let totalRoomCreated = 0;
     let totalDatesProcessed = 0;
 
-    const { roomCategoryId,  priceOverride } = jobData;
+    const { roomCategoryId, priceOverride } = jobData;
 
     //check if room category exists
 
     const roomCategory = await roomCategoryRepository.findById(roomCategoryId)
 
-    if(!roomCategory) {
+    if (!roomCategory) {
         throw new Error(`Room category with id ${roomCategoryId} not found`);
     }
-    
+
     const startDate = new Date(jobData.startDate);
     const endDate = new Date(jobData.endDate);
-    if (startDate > endDate) {
+    if (startDate >= endDate) {
         throw new Error('Start date must be before end date');
     }
 
-    if (startDate < new Date()){
+    if (startDate < new Date()) {
         throw new Error('Start date must be in the future');
     }
 
-    const totalDays =  Math.ceil(endDate.getTime() - startDate.getTime()) /(1000*60*60*24)
+
+    const totalDays = Math.ceil(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+
+    logger.info(`Starting room generation for room category ${roomCategoryId} from ${startDate.toDateString()} to ${endDate.toDateString()} for total of ${totalDays} days`)
+
 
     const batchSize = jobData.batchSize || 30;
 
@@ -43,15 +48,15 @@ export async function generateRooms(jobData : RoomGenerationJob) {
 
     while (currentDate < endDate) {
         const batchEndDate = new Date(currentDate);
-        batchEndDate.setDate(batchEndDate.getDate() + batchSize  );
+        batchEndDate.setDate(batchEndDate.getDate() + batchSize);
 
-        if(batchEndDate > endDate) {
+        if (batchEndDate > endDate) {
             batchEndDate.setTime(endDate.getTime());
 
 
         }
 
-        const batchResult = await processDateBatch(roomCategory,currentDate, batchEndDate, jobData.priceOverride)
+        const batchResult = await processDateBatch(roomCategory, currentDate, batchEndDate, jobData.priceOverride)
 
         totalRoomCreated += batchResult.roomsCreated;
         totalDatesProcessed += batchResult.datesProcessed;
@@ -65,28 +70,28 @@ export async function generateRooms(jobData : RoomGenerationJob) {
 
 
 
-export async function processDateBatch(  roomCategory : RoomCategory, startDate : Date ,  endDate : Date ,priceOverride: number | undefined  ) {
-    
-    
+export async function processDateBatch(roomCategory: RoomCategory, startDate: Date, endDate: Date, priceOverride: number | undefined) {
+
+
     let roomsCreated = 0;
     let datesProcessed = 0;
-    const roomsToCreate:any[] = []
+    const roomsToCreate: any[] = []
 
     const currentDate = new Date(startDate);
 
-    while(currentDate <= endDate ){
+    while (currentDate <= endDate) {
         const exisitingRooms = await roomRepostitory.findByRoomCategoryIdAndDate(
             roomCategory.id,
             currentDate
         )
-        if(!exisitingRooms) {
+        if (!exisitingRooms) {
             roomsToCreate.push({
                 hotelId: roomCategory.hotelId,
                 roomCategoryId: roomCategory.id,
                 dateOfAvailability: new Date(currentDate),
                 price: priceOverride || roomCategory.price,
-                createdAt:new Date(),
-                updatedAt:new Date(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
                 deletedAt: null
 
             })
@@ -95,16 +100,17 @@ export async function processDateBatch(  roomCategory : RoomCategory, startDate 
         datesProcessed++;
     }
 
-    if(roomsToCreate.length > 0) {
+    if (roomsToCreate.length > 0) {
         await roomRepostitory.bulkCreate(roomsToCreate);
         roomsCreated += roomsToCreate.length;
-        
+
     }
 
-    return {roomsCreated, datesProcessed
+    return {
+        roomsCreated, datesProcessed
 
-        
+
     };
-    
+
 
 }
