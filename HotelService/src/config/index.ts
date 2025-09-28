@@ -5,6 +5,7 @@ type ServerConfig = {
     PORT: number
       REDIS_PORT?: number,
     REDIS_HOST?: string,
+    ROOM_CRON?: string
 }
 
 type DBConfig = {
@@ -32,6 +33,6 @@ export const dbConfig: DBConfig = {
     DB_USER: process.env.DB_USER || 'root',
     DB_PASSWORD: process.env.DB_PASSWORD || 'root',
     DB_NAME: process.env.DB_NAME || 'test_db'
-    
+    ROOM_CRON: process.env.ROOM_CRON || '0 2 * * *' // Default to 2 AM daily
 
 };
